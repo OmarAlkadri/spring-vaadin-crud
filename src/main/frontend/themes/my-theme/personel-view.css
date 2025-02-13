@@ -1,0 +1,17 @@
+/* frontend/themes/mytheme/personel-view.css */
+
+.collaborative-master-detail-view {
+    background-color: #f5f5f5;
+}
+
+.grid-wrapper {
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.button-layout {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
