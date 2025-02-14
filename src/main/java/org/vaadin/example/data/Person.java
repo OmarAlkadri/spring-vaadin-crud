@@ -3,7 +3,7 @@ package org.vaadin.example.data;
 import jakarta.persistence.Entity;
 
 @Entity
-public class SamplePerson extends AbstractEntity {
+public class Person extends AbstractEntity {
     private String firstName;
     private String lastName;
     private String nationalNumber;

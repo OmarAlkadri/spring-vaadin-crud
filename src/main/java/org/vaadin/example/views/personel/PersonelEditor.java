@@ -1,7 +1,10 @@
 package org.vaadin.example.views.personel;
 
-import org.vaadin.example.data.SamplePerson;
-import org.vaadin.example.services.SamplePersonService;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.vaadin.example.data.Person;
+import org.vaadin.example.services.IPersonService;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -35,10 +38,10 @@ import com.vaadin.flow.data.binder.ValidationException;
  */
 public class PersonelEditor extends VerticalLayout {
 
-    private final SamplePersonService samplePersonService;
+    private final IPersonService personService;
     private PersonelGrid personelGrid;
-    private SamplePerson personel;
-    private final Binder<SamplePerson> binder = new Binder<>(SamplePerson.class);
+    private Person personel;
+    private final Binder<Person> binder = new Binder<>(Person.class);
 
     private final TextField firstName = new TextField("Ad");
     private final TextField lastName = new TextField("Soyad");
@@ -47,15 +50,17 @@ public class PersonelEditor extends VerticalLayout {
     private final Button save = new Button("Kaydet", e -> savePerson());
     private final Button cancel = new Button("İptal", e -> clearForm());
 
+    private final List<EditListener> editListeners = new ArrayList<>();
+
     /**
      * PersonelEditor sınıfının kurucusu.
      * Bu metod, form bileşenlerini başlatır ve düzenleme işlemi için hazır hale
      * getirir.
      * 
-     * @param samplePersonService Personel verilerini yöneten servis sınıfı.
+     * @param personService Personel verilerini yöneten servis sınıfı.
      */
-    public PersonelEditor(SamplePersonService samplePersonService) {
-        this.samplePersonService = samplePersonService;
+    public PersonelEditor(IPersonService personService) {
+        this.personService = personService;
 
         FormLayout formLayout = new FormLayout(firstName, lastName, nationalNumber);
         HorizontalLayout buttonLayout = new HorizontalLayout(save, cancel);
@@ -63,7 +68,17 @@ public class PersonelEditor extends VerticalLayout {
         save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         cancel.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 
-        binder.bindInstanceFields(this);
+        binder.forField(firstName)
+                .asRequired("Ad alanı boş olamaz!")
+                .bind(Person::getFirstName, Person::setFirstName);
+
+        binder.forField(lastName)
+                .asRequired("Soyad alanı boş olamaz!")
+                .bind(Person::getLastName, Person::setLastName);
+
+        binder.forField(nationalNumber)
+                .asRequired("TC Kimlik No boş olamaz!")
+                .bind(Person::getNationalNumber, Person::setNationalNumber);
 
         add(formLayout, buttonLayout);
         setWidth("400px");
@@ -84,7 +99,7 @@ public class PersonelEditor extends VerticalLayout {
      * Formda var olan veriler temizlenir ve yeni bir personel nesnesi oluşturulur.
      */
     public void addNewPerson() {
-        this.personel = new SamplePerson();
+        this.personel = new Person();
         binder.readBean(this.personel);
         save.setText("Kaydet");
     }
@@ -94,7 +109,7 @@ public class PersonelEditor extends VerticalLayout {
      * 
      * @param person Düzenlenecek personel nesnesi.
      */
-    public void editPerson(SamplePerson person) {
+    public void editPerson(Person person) {
         this.personel = person;
         binder.readBean(person);
         save.setText("Düzenle");
@@ -106,22 +121,42 @@ public class PersonelEditor extends VerticalLayout {
      * Eğer formda hata varsa, hata mesajı gösterilir.
      */
     private void savePerson() {
+        if (!binder.validate().isOk()) {
+            return; // Eğer validasyon başarısızsa işlemi durdur
+        }
+
         try {
             binder.writeBean(personel);
             if (personel.getId() == null) {
-                samplePersonService.save(personel);
+                personService.save(personel);
                 Notification.show("Yeni çalışan başarıyla kaydedildi!", 3000, Notification.Position.BOTTOM_START);
             } else {
-                // Eğer mevcut bir personel ise (ID var)
-                samplePersonService.update(personel.getId(), personel);
+                personService.update(personel.getId(), personel);
                 Notification.show("Çalışan başarıyla güncellendi!", 3000, Notification.Position.BOTTOM_START);
             }
             personelGrid.refreshGrid();
             clearForm();
+            setVisible(false);
+            notifyEditListeners();
+
         } catch (ValidationException e) {
             Notification.show("Lütfen bilgileri kontrol edin!", 3000, Notification.Position.BOTTOM_START)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
+    }
+
+    public void addEditListener(EditListener listener) {
+        editListeners.add(listener);
+    }
+
+    private void notifyEditListeners() {
+        for (EditListener listener : editListeners) {
+            listener.onEdit();
+        }
+    }
+
+    public interface EditListener {
+        void onEdit();
     }
 
     /**

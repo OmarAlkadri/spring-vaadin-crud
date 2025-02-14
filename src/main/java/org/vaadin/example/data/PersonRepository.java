@@ -5,10 +5,10 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public interface SamplePersonRepository
+public interface PersonRepository
         extends
-        JpaRepository<SamplePerson, Long>,
-        JpaSpecificationExecutor<SamplePerson> {
+        JpaRepository<Person, Long>,
+        JpaSpecificationExecutor<Person> {
 
     /**
      * Verilen adı içeren kişileri arar (büyük/küçük harf duyarsız).
@@ -16,5 +16,5 @@ public interface SamplePersonRepository
      * @param firstName Aranacak olan kişinin adı.
      * @return Verilen adı içeren kişilerin listesini döndürür.
      */
-    List<SamplePerson> findByFirstNameContainingIgnoreCase(String firstName);
+    List<Person> findByFirstNameContainingIgnoreCase(String firstName);
 }

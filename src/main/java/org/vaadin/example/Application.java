@@ -1,14 +1,17 @@
 package org.vaadin.example;
 
-import org.vaadin.example.data.SamplePersonRepository;
-import com.vaadin.flow.component.page.AppShellConfigurator;
-import com.vaadin.flow.theme.Theme;
 import javax.sql.DataSource;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.sql.init.SqlDataSourceScriptDatabaseInitializer;
 import org.springframework.boot.autoconfigure.sql.init.SqlInitializationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.Environment;
+import org.vaadin.example.data.PersonRepository;
+
+import com.vaadin.flow.component.page.AppShellConfigurator;
+import com.vaadin.flow.theme.Theme;
 
 /**
  * The entry point of the Spring Boot application.
@@ -26,16 +29,22 @@ public class Application implements AppShellConfigurator {
     }
 
     @Bean
-    SqlDataSourceScriptDatabaseInitializer dataSourceScriptDatabaseInitializer(DataSource dataSource,
-            SqlInitializationProperties properties, SamplePersonRepository repository) {
-        // This bean ensures the database is only initialized when empty
+    public SqlDataSourceScriptDatabaseInitializer dataSourceScriptDatabaseInitializer(
+            DataSource dataSource,
+            SqlInitializationProperties properties,
+            PersonRepository repository,
+            Environment environment) {
+
+        boolean dbEnabled = Boolean.parseBoolean(environment.getProperty("db.enabled", "false"));
+
+        if (!dbEnabled) {
+            return null;
+        }
+
         return new SqlDataSourceScriptDatabaseInitializer(dataSource, properties) {
             @Override
             public boolean initializeDatabase() {
-                if (repository.count() == 0L) {
-                    return super.initializeDatabase();
-                }
-                return false;
+                return repository.count() == 0L && super.initializeDatabase();
             }
         };
     }

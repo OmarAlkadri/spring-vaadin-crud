@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # خدمة PostgreSQL
   db:
     image: postgres:13
     container_name: postgres-db
@@ -10,20 +9,19 @@ services:
       POSTGRES_PASSWORD: vaadinstart
       POSTGRES_DB: test
     ports:
-      - "5433:5432" # تغيير البورت من 5432 إلى 5433
+      - "5433:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
 
-  # خدمة تطبيق Java
   app:
     build: .
     container_name: vaadin-app
     ports:
-      - "8080:8080" # بورت التطبيق
+      - "8080:8080"
     depends_on:
-      - db # التطبيق يعتمد على قاعدة البيانات
+      - db
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5433/vaadinstart # الاتصال بقاعدة البيانات عبر الحاوية
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5433/vaadinstart
       SPRING_DATASOURCE_USERNAME: vaadinstart
       SPRING_DATASOURCE_PASSWORD: vaadinstart
       SPRING_JPA_HIBERNATE_DDL_AUTO: update

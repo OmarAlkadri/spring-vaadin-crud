@@ -18,11 +18,11 @@ import com.vaadin.flow.component.textfield.TextField;
  */
 public class PersonelSearch extends HorizontalLayout {
 
-    private final TextField searchField = new TextField(); // Arama alanı
-    private final Button searchButton = new Button("Search"); // Arama butonu
-    private final PersonelGrid personelGrid; // Personel verilerini gösteren grid
-    private final Button addNewButton; // Yeni personel ekleme butonu
-    private boolean isEditorVisible = false; // Düzenleyicinin görünürlüğünü tutan bayrak
+    private final TextField searchField = new TextField();
+    private final Button searchButton = new Button("Search");
+    private final PersonelGrid personelGrid;
+    private final Button addNewButton;
+    private boolean isEditorVisible = false;
 
     /**
      * PersonelSearch sınıfının kurucusu.
@@ -49,13 +49,14 @@ public class PersonelSearch extends HorizontalLayout {
         setJustifyContentMode(JustifyContentMode.BETWEEN);
         setAlignItems(Alignment.CENTER);
 
-        // Arama alanı ve butonunu yatay düzenle yerleştiriyoruz
         HorizontalLayout searchGroup = new HorizontalLayout(searchField, searchButton);
         searchGroup.setAlignItems(Alignment.CENTER);
 
         add(searchGroup, addNewButton);
 
         personelGrid.addEditListener(this::onEdit);
+        personelGrid.getPersonelEditor().addEditListener(this::onEdit);
+
     }
 
     /**

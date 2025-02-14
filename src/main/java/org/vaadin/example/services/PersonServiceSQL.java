@@ -3,31 +3,34 @@ package org.vaadin.example.services;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.vaadin.example.data.SamplePerson;
-import org.vaadin.example.data.SamplePersonRepository;
+import org.vaadin.example.data.Person;
+import org.vaadin.example.data.PersonRepository;
 
 /**
- * SamplePersonService sınıfı, personel verileriyle ilgili iş mantığını sağlar.
+ * PersonServiceSQL sınıfı, personel verileriyle ilgili iş mantığını sağlar.
  * Bu sınıf, personel verilerini listelemeyi, eklemeyi, silmeyi ve aramayı
  * sağlar.
  * Ayrıca, veritabanına yapılan işlemleri yönetmek için
- * SamplePersonRepository'yi kullanır.
+ * PersonRepository'yi kullanır.
  */
 @Service
-public class SamplePersonService implements ISamplePersonService {
+@Profile("sql")
+@ConditionalOnProperty(name = "db.enabled", havingValue = "false", matchIfMissing = true)
+public class PersonServiceSQL implements IPersonService {
 
-    private final SamplePersonRepository repository;
+    private final PersonRepository repository;
 
     /**
-     * SamplePersonService sınıfının kurucusu.
+     * PersonServiceSQL sınıfının kurucusu.
      * 
      * @param repository Personel verilerini yöneten repository nesnesi.
      */
-    public SamplePersonService(SamplePersonRepository repository) {
+    public PersonServiceSQL(PersonRepository repository) {
         this.repository = repository;
     }
 
@@ -37,7 +40,7 @@ public class SamplePersonService implements ISamplePersonService {
      * @param id Aranacak personelin id'si.
      * @return Personel verisini içeren Optional.
      */
-    public Optional<SamplePerson> get(Long id) {
+    public Optional<Person> get(Long id) {
         return repository.findById(id);
     }
 
@@ -49,7 +52,7 @@ public class SamplePersonService implements ISamplePersonService {
      * @param entity Kaydedilecek veya güncellenecek personel verisi.
      * @return Kaydedilen veya güncellenmiş personel nesnesi.
      */
-    public SamplePerson save(SamplePerson entity) {
+    public Person save(Person entity) {
         return repository.save(entity); // Personeli kaydeder veya günceller
     }
 
@@ -61,7 +64,7 @@ public class SamplePersonService implements ISamplePersonService {
      * @param entity Güncellenmiş personel verisi.
      * @return Güncellenmiş personel nesnesi.
      */
-    public SamplePerson update(Long id, SamplePerson entity) {
+    public Person update(Long id, Person entity) {
         if (repository.existsById(id)) {
             entity.setId(id);
             return repository.save(entity);
@@ -85,7 +88,7 @@ public class SamplePersonService implements ISamplePersonService {
      * @param pageable Sayfalama bilgisi.
      * @return Personel listesini içeren sayfa.
      */
-    public Page<SamplePerson> list(Pageable pageable) {
+    public Page<Person> list(Pageable pageable) {
         return repository.findAll(pageable);
     }
 
@@ -95,19 +98,8 @@ public class SamplePersonService implements ISamplePersonService {
      * @param name Aranacak olan kişinin adı veya soyadı.
      * @return İsim göre eşleşen kişiler listesini döndürür.
      */
-    public List<SamplePerson> searchByName(String firstName) {
+    public List<Person> searchByName(String firstName) {
         return repository.findByFirstNameContainingIgnoreCase(firstName);
-    }
-
-    /**
-     * Filtreleme ve sayfalama kullanarak personel listesini getirir.
-     * 
-     * @param pageable Sayfalama bilgisi.
-     * @param filter   Personel verileri üzerinde uygulanacak filtre.
-     * @return Filtrelenmiş personel listesini içeren sayfa.
-     */
-    public Page<SamplePerson> list(Pageable pageable, Specification<SamplePerson> filter) {
-        return repository.findAll(filter, pageable);
     }
 
     /**
