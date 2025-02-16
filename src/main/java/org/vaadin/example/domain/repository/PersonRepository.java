@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.stereotype.Repository;
 import org.vaadin.example.domain.model.Person;
 
 /**
@@ -11,6 +12,7 @@ import org.vaadin.example.domain.model.Person;
  * JpaRepository ve JpaSpecificationExecutor kullanılarak,
  * temel CRUD işlemleri ve dinamik sorgulamalar desteklenmektedir.
  */
+@Repository
 public interface PersonRepository
         extends
         JpaRepository<Person, Long>, // Temel CRUD işlemleri için JpaRepository kullanılır.
