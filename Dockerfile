@@ -19,7 +19,7 @@ COPY src ./src
 RUN mvn clean package -Pproduction -DskipTests -Dvaadin.ignoreVersionChecks=true
 
 # İkinci Aşama: Çalıştırma ortamı
-FROM eclipse-temurin:17-jdk-slim
+FROM openjdk:17-slim
 
 WORKDIR /app
 
