@@ -30,4 +30,4 @@ COPY --from=builder /app/target/spring-vaadin-crud-1.0-SNAPSHOT.jar /app.jar
 EXPOSE 8081
 
 # Uygulamayı başlat
-CMD ["sh", "-c", "java -jar /app.jar --db.enabled=${DB_ENABLED} --spring.profiles.active=${SPRING_PROFILE}"]
+CMD ["sh", "-c", "java -jar /app.jar --db.enabled=${DB_ENABLED} --spring.profiles.active=${SPRING_PROFILE} --debug"]

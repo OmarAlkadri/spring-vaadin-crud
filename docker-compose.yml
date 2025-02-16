@@ -1,24 +1,12 @@
 version: '3.8'
 services:
-  db:
-    image: postgres:15
-    restart: always
-    environment:
-      POSTGRES_DB: test
-      POSTGRES_USER: vaadinstart
-      POSTGRES_PASSWORD: vaadinstart
-    ports:
-      - "5433:5432"
-
   app:
     build: .
-    depends_on:
-      - db
     environment:
       SPRING_DATASOURCE_URL: "jdbc:postgresql://interchange.proxy.rlwy.net:47185/railway"
       SPRING_DATASOURCE_USERNAME: "postgres"
       SPRING_DATASOURCE_PASSWORD: "FDbqXDaVwnCmVqSLJNyirBVGphoGDdbc"
-      DB_ENABLED: "${DB_ENABLED:-true}"
-      SPRING_PROFILE: "${SPRING_PROFILE:-sql}"
+      DB_ENABLED: "true"
+      SPRING_PROFILE: "sql"
     ports:
       - "8081:8081"

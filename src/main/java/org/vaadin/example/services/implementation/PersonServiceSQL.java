@@ -16,6 +16,7 @@ import org.vaadin.example.services.IPersonService;
  * Verileri database üzerinden getirir, ekler, siler ve arama yapar.
  * Database işlemleri için PersonRepository kullanır.
  */
+
 @Service
 @Profile("sql") // Bu service yalnızca "sql" profile aktif olduğunda çalışır.
 @ConditionalOnProperty(name = "db.enabled", havingValue = "true", matchIfMissing = true)
