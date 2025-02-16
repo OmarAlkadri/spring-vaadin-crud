@@ -19,5 +19,6 @@ services:
       SPRING_DATASOURCE_USERNAME: "postgres"
       SPRING_DATASOURCE_PASSWORD: "FDbqXDaVwnCmVqSLJNyirBVGphoGDdbc"
       DB_ENABLED: "${DB_ENABLED:-true}"
+      SPRING_PROFILE: "${SPRING_PROFILE:-sql}"
     ports:
       - "8081:8081"
