@@ -18,6 +18,6 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/test
       SPRING_DATASOURCE_USERNAME: vaadinstart
       SPRING_DATASOURCE_PASSWORD: vaadinstart
-      DB_ENABLED: "true"
+      DB_ENABLED: "${DB_ENABLED:-true}"
     ports:
       - "8081:8081"
