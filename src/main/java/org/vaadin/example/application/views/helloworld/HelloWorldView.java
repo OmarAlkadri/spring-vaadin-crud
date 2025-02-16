@@ -1,4 +1,4 @@
-package org.vaadin.example.views.helloworld;
+package org.vaadin.example.application.views.helloworld;
 
 import org.vaadin.lineawesome.LineAwesomeIconUrl;
 

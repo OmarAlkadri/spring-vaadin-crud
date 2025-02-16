@@ -1,4 +1,4 @@
-package org.vaadin.example.views;
+package org.vaadin.example.application.views;
 
 import java.util.List;
 

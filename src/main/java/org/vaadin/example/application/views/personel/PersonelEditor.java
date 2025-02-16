@@ -1,10 +1,10 @@
-package org.vaadin.example.views.personel;
+package org.vaadin.example.application.views.personel;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.vaadin.example.data.Person;
-import org.vaadin.example.services.IPersonService;
+import org.vaadin.example.domain.model.Person;
+import org.vaadin.example.infrastructure.PersonelDataProvider;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -20,25 +20,10 @@ import com.vaadin.flow.data.binder.ValidationException;
 /**
  * PersonelEditor sınıfı, personel eklemek veya düzenlemek için kullanılan bir
  * bileşendir.
- * Bu sınıf, kullanıcıların yeni bir çalışan eklemesine veya mevcut çalışan
- * bilgilerini düzenlemesine olanak tanır.
- * 
- * Bileşenler:
- * - firstName: Çalışanın adını girebilmek için kullanılan TextField bileşeni.
- * - lastName: Çalışanın soyadını girebilmek için kullanılan TextField bileşeni.
- * - nationalNumber: Çalışanın TC Kimlik numarasını girebilmek için kullanılan
- * TextField bileşeni.
- * - save: Çalışan bilgilerini kaydetmek için kullanılan buton.
- * - cancel: İşlemden vazgeçmek için kullanılan buton.
- * - binder: Form verilerinin doğruluğunu kontrol eden ve verileri bağlı olan
- * nesne.
- * 
- * Bu sınıfın amacı, personel bilgilerini düzenlemek veya yeni bir personel
- * eklemektir.
  */
 public class PersonelEditor extends VerticalLayout {
 
-    private final IPersonService personService;
+    private final PersonelDataProvider dataProvider;
     private PersonelGrid personelGrid;
     private Person personel;
     private final Binder<Person> binder = new Binder<>(Person.class);
@@ -52,15 +37,8 @@ public class PersonelEditor extends VerticalLayout {
 
     private final List<EditListener> editListeners = new ArrayList<>();
 
-    /**
-     * PersonelEditor sınıfının kurucusu.
-     * Bu metod, form bileşenlerini başlatır ve düzenleme işlemi için hazır hale
-     * getirir.
-     * 
-     * @param personService Personel verilerini yöneten servis sınıfı.
-     */
-    public PersonelEditor(IPersonService personService) {
-        this.personService = personService;
+    public PersonelEditor(PersonelDataProvider dataProvider) {
+        this.dataProvider = dataProvider;
 
         FormLayout formLayout = new FormLayout(firstName, lastName, nationalNumber);
         HorizontalLayout buttonLayout = new HorizontalLayout(save, cancel);
@@ -84,63 +62,45 @@ public class PersonelEditor extends VerticalLayout {
         setWidth("400px");
     }
 
-    /**
-     * PersonelEditor bileşenine PersonelGrid bileşenini ekler.
-     * PersonelGrid, düzenleme işlemi yapıldıktan sonra gridin yenilenmesini sağlar.
-     * 
-     * @param personelGrid Personel verilerini görüntüleyen grid bileşeni.
-     */
     public void setPersonelGrid(PersonelGrid personelGrid) {
         this.personelGrid = personelGrid;
     }
 
-    /**
-     * Yeni bir personel eklemek için formu hazırlar.
-     * Formda var olan veriler temizlenir ve yeni bir personel nesnesi oluşturulur.
-     */
     public void addNewPerson() {
         this.personel = new Person();
         binder.readBean(this.personel);
         save.setText("Kaydet");
     }
 
-    /**
-     * Mevcut bir personeli düzenlemek için formu doldurur.
-     * 
-     * @param person Düzenlenecek personel nesnesi.
-     */
     public void editPerson(Person person) {
         this.personel = person;
         binder.readBean(person);
         save.setText("Düzenle");
     }
 
-    /**
-     * Personel bilgilerini kaydeder.
-     * Formdaki veriler, servis sınıfına kaydedilir ve grid yenilenir.
-     * Eğer formda hata varsa, hata mesajı gösterilir.
-     */
     private void savePerson() {
         if (!binder.validate().isOk()) {
-            return; // Eğer validasyon başarısızsa işlemi durdur
+            return;
         }
 
         try {
             binder.writeBean(personel);
             if (personel.getId() == null) {
-                personService.save(personel);
-                Notification.show("Yeni çalışan başarıyla kaydedildi!", 3000, Notification.Position.BOTTOM_START);
+                dataProvider.save(personel);
+                Notification.show("Yeni çalışan başarıyla kaydedildi!", 3000, Notification.Position.TOP_END)
+                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             } else {
-                personService.update(personel.getId(), personel);
-                Notification.show("Çalışan başarıyla güncellendi!", 3000, Notification.Position.BOTTOM_START);
+                dataProvider.update(personel.getId(), personel);
+                Notification.show("Çalışan başarıyla güncellendi!", 3000, Notification.Position.TOP_END)
+                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             }
+            dataProvider.refreshAll();
             personelGrid.refreshGrid();
             clearForm();
             setVisible(false);
             notifyEditListeners();
-
         } catch (ValidationException e) {
-            Notification.show("Lütfen bilgileri kontrol edin!", 3000, Notification.Position.BOTTOM_START)
+            Notification.show("Lütfen bilgileri kontrol edin!", 3000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
     }
@@ -159,11 +119,6 @@ public class PersonelEditor extends VerticalLayout {
         void onEdit();
     }
 
-    /**
-     * Formu temizler.
-     * Düzenleme veya ekleme işlemi sonrasında formda herhangi bir veri kalmaması
-     * sağlanır.
-     */
     public void clearForm() {
         binder.readBean(null);
     }

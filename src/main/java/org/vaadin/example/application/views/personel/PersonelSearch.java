@@ -1,4 +1,4 @@
-package org.vaadin.example.views.personel;
+package org.vaadin.example.application.views.personel;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -41,7 +41,7 @@ public class PersonelSearch extends HorizontalLayout {
         searchField.addValueChangeListener(event -> {
             String searchText = event.getValue().trim().toLowerCase();
             if (searchText.isEmpty()) {
-                personelGrid.refreshData();
+                personelGrid.filterByName(null);
             }
         });
 
@@ -91,7 +91,7 @@ public class PersonelSearch extends HorizontalLayout {
         if (!searchText.isEmpty()) {
             personelGrid.filterByName(searchText);
         } else {
-            personelGrid.refreshData();
+            personelGrid.refreshGrid();
         }
     }
 

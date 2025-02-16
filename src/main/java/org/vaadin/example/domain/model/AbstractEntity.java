@@ -1,4 +1,4 @@
-package org.vaadin.example.data;
+package org.vaadin.example.domain.model;
 
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;

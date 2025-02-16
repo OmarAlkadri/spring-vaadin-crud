@@ -8,7 +8,8 @@ import org.springframework.boot.autoconfigure.sql.init.SqlDataSourceScriptDataba
 import org.springframework.boot.autoconfigure.sql.init.SqlInitializationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
-import org.vaadin.example.data.PersonRepository;
+import org.springframework.web.client.RestTemplate;
+import org.vaadin.example.domain.repository.PersonRepository;
 
 import com.vaadin.flow.component.page.AppShellConfigurator;
 import com.vaadin.flow.theme.Theme;
@@ -29,6 +30,10 @@ public class Application implements AppShellConfigurator {
     }
 
     @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+
     public SqlDataSourceScriptDatabaseInitializer dataSourceScriptDatabaseInitializer(
             DataSource dataSource,
             SqlInitializationProperties properties,

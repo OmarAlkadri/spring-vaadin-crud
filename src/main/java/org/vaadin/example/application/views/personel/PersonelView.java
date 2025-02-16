@@ -1,6 +1,6 @@
-package org.vaadin.example.views.personel;
+package org.vaadin.example.application.views.personel;
 
-import org.vaadin.example.services.IPersonService;
+import org.vaadin.example.infrastructure.PersonelDataProvider;
 import org.vaadin.lineawesome.LineAwesomeIconUrl;
 
 import com.vaadin.flow.component.dependency.CssImport;
@@ -16,8 +16,7 @@ import com.vaadin.flow.router.Route;
 
 /**
  * Gelişmiş ve optimize edilmiş PersonelView sınıfı.
- * Bu sınıf, personel yönetim ekranının ana bileşenlerini içerir ve
- * Vaadin framework kullanarak kullanıcı arayüzünü oluşturur.
+ * Bu sınıf, personel yönetim ekranının ana bileşenlerini içerir.
  */
 @CssImport("./themes/my-theme/personel-view.css")
 @PageTitle("Personel")
@@ -26,22 +25,21 @@ import com.vaadin.flow.router.Route;
 @Uses(Icon.class)
 public class PersonelView extends SplitLayout {
 
-    private final IPersonService personService;
+    private final PersonelDataProvider personelDataProvider;
     private final PersonelGrid personelGrid;
     private final PersonelEditor personelEditor;
     private final PersonelSearch personelSearch;
 
     /**
      * PersonelView sınıfının kurucusu.
-     * Bu metod, bileşenleri başlatır ve kullanıcı arayüzünü oluşturur.
      * 
-     * @param personService Personel verilerini sağlayan servis.
+     * @param personelDataProvider Personel verilerini sağlayan veri sağlayıcı.
      */
-    public PersonelView(IPersonService personService) {
-        this.personService = personService;
+    public PersonelView(PersonelDataProvider personelDataProvider) {
+        this.personelDataProvider = personelDataProvider;
 
-        this.personelGrid = new PersonelGrid(this.personService);
-        this.personelEditor = new PersonelEditor(this.personService);
+        this.personelGrid = new PersonelGrid(this.personelDataProvider);
+        this.personelEditor = new PersonelEditor(this.personelDataProvider);
 
         this.personelEditor.setPersonelGrid(personelGrid);
         personelGrid.setPersonelEditor(personelEditor);

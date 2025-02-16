@@ -1,4 +1,4 @@
-package org.vaadin.example.services;
+package org.vaadin.example.services.initialization;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -6,8 +6,8 @@ import java.util.stream.IntStream;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.vaadin.example.data.Person;
-import org.vaadin.example.data.PersonRepository;
+import org.vaadin.example.domain.model.Person;
+import org.vaadin.example.domain.repository.PersonRepository;
 
 import com.github.javafaker.Faker;
 
@@ -27,8 +27,8 @@ import jakarta.annotation.PostConstruct;
 @Service
 public class PersonDataInitializer {
 
-    private final PersonRepository repository; // Veritabanına veri eklemek için kullanılan repository
-    private final Faker faker; // Rasgele veriler oluşturmak için kullanılan Faker nesnesi
+    private final PersonRepository repository;
+    private final Faker faker;
 
     /**
      * PersonDataInitializer sınıfının kurucusu.
@@ -37,7 +37,7 @@ public class PersonDataInitializer {
      */
     public PersonDataInitializer(PersonRepository repository) {
         this.repository = repository;
-        this.faker = new Faker(); // Faker nesnesini başlatır
+        this.faker = new Faker();
     }
 
     /**
@@ -67,15 +67,15 @@ public class PersonDataInitializer {
      * @return List<Person> Rasgele oluşturulmuş personel listesi.
      */
     private List<Person> generateMockData() {
-        return IntStream.rangeClosed(1, 10) // 1'den 10'a kadar olan sayılarla döngü başlatılır
+        return IntStream.rangeClosed(1, 100)
                 .mapToObj(i -> {
                     Person person = new Person();
-                    person.setFirstName(faker.name().firstName()); // Rastgele bir ilk isim oluşturur
-                    person.setLastName(faker.name().lastName()); // Rastgele bir soyisim oluşturur
-                    person.setNationalNumber(generateNationalNumber()); // Rastgele bir ulusal numara oluşturur
+                    person.setFirstName(faker.name().firstName());
+                    person.setLastName(faker.name().lastName());
+                    person.setNationalNumber(generateNationalNumber());
                     return person;
                 })
-                .collect(Collectors.toList()); // Listeye dönüştürür
+                .collect(Collectors.toList());
     }
 
     /**
@@ -84,6 +84,6 @@ public class PersonDataInitializer {
      * @return String Rastgele bir ulusal numara.
      */
     private String generateNationalNumber() {
-        return faker.number().digits(10); // 10 haneli bir sayı üretir
+        return faker.number().digits(10);
     }
 }

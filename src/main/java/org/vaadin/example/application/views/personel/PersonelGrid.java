@@ -1,40 +1,34 @@
-package org.vaadin.example.views.personel;
+package org.vaadin.example.application.views.personel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.vaadin.example.data.Person;
-import org.vaadin.example.services.IPersonService;
+import org.vaadin.example.domain.model.Person;
+import org.vaadin.example.infrastructure.PersonelDataProvider;
 
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 
-/**
- * PersonelGrid sınıfı, personel verilerini gösteren ve düzenleme işlevselliği
- * sağlayan bir bileşendir.
- * Bu sınıf, personel verilerini listeleyip düzenlemeyi ve silmeyi sağlar.
- * 
- * Bileşenler:
- * - PersonService: Personel verilerini sağlayan servis.
- * - personelEditor: Personel düzenleme bileşeni.
- * - activeEditButton: Şu anda aktif olan düzenleme butonu.
- * - editListeners: Düzenleme işlemi hakkında dinleyiciler.
- */
 public class PersonelGrid extends Div {
 
-    private final IPersonService personService;
+    private Dialog confirmDialog = new Dialog();
+    private Person personToDelete;
+    private final DataProvider<Person, Void> dataProvider;
     private PersonelEditor personelEditor;
     private Button activeEditButton = null;
     private final List<EditListener> editListeners = new ArrayList<>();
@@ -48,15 +42,8 @@ public class PersonelGrid extends Div {
 
     private HorizontalLayout pageNumberLayout;
 
-    /**
-     * PersonelGrid sınıfının kurucusu.
-     * Bu metod, personel verilerini listelemeyi ve düzenleme işlevselliği eklemeyi
-     * başlatır.
-     * 
-     * @param IPersonService Personel verilerini sağlayan servis.
-     */
-    public PersonelGrid(IPersonService personService) {
-        this.personService = personService;
+    public PersonelGrid(DataProvider<Person, Void> dataProvider) {
+        this.dataProvider = dataProvider;
         this.grid = new Grid<>(Person.class, false);
         grid.setClassName("force-focus-outline");
 
@@ -102,6 +89,7 @@ public class PersonelGrid extends Div {
 
         add(grid, paginationControls);
         refreshGrid();
+        setupConfirmationDialog();
     }
 
     private void goToPreviousPage() {
@@ -111,46 +99,131 @@ public class PersonelGrid extends Div {
         }
     }
 
+    public void filterByName(String name) {
+        if (dataProvider instanceof PersonelDataProvider) {
+            ((PersonelDataProvider) dataProvider).setSearchQuery(name);
+            refreshGrid();
+        }
+    }
+
     private void goToNextPage() {
         currentPage++;
         refreshGrid();
     }
 
-    public void refreshData() {
-        grid.setItems(query -> personService.list(VaadinSpringDataHelpers.toSpringPageRequest(query)).stream());
+    public void refreshGrid() {
+        if (dataProvider instanceof PersonelDataProvider) {
+            PersonelDataProvider personelDataProvider = (PersonelDataProvider) dataProvider;
 
+            List<Person> items = personelDataProvider.fetch(new Query<>(currentPage, pageSize, null, null, null))
+                    .collect(Collectors.toList());
+
+            if (items.isEmpty() && currentPage > 0) {
+                currentPage--;
+                items = personelDataProvider.fetch(new Query<>(currentPage, pageSize, null, null, null))
+                        .collect(Collectors.toList());
+            }
+
+            grid.setItems(items);
+            previousButton.setEnabled(currentPage > 0);
+            nextButton.setEnabled(personelDataProvider.hasNext());
+            updatePageNumberLayout(personelDataProvider.getTotalPages(pageSize));
+        }
     }
 
-    /**
-     * Personel düzenleyici bileşenini ayarlamak için kullanılan metod.
-     * 
-     * @param personelEditor Personel düzenleyici bileşeni.
-     */
+    private void updatePageNumberLayout(int totalPages) {
+        pageNumberLayout.removeAll();
+        List<Integer> pages = new ArrayList<>();
+
+        // إضافة الصفحة الأولى دائمًا
+        if (totalPages > 0)
+            pages.add(0);
+
+        // إضافة "..." قبل الصفحات الوسطية إذا كانت هناك فجوة
+        if (currentPage > 2) {
+            pages.add(-1); // "..." للذهاب للخلف
+        }
+
+        // إضافة الصفحات القريبة من الصفحة الحالية
+        for (int i = Math.max(1, currentPage - 1); i <= Math.min(totalPages - 2, currentPage + 1); i++) {
+            pages.add(i);
+        }
+
+        // إضافة "..." بعد الصفحات الوسطية إذا كانت هناك فجوة
+        if (currentPage < totalPages - 3) {
+            pages.add(-2); // "..." للذهاب للأمام
+        }
+
+        // إضافة الصفحة الأخيرة دائمًا (إذا لم تكن موجودة بالفعل)
+        if (totalPages > 1 && !pages.contains(totalPages - 1)) {
+            pages.add(totalPages - 1);
+        }
+
+        for (Integer pageNum : pages) {
+            if (pageNum == -1) {
+                Button dotsButton = new Button("...");
+                dotsButton.addClickListener(e -> {
+                    currentPage = Math.max(0, currentPage - 3);
+                    refreshGrid();
+                });
+                pageNumberLayout.add(dotsButton);
+            } else if (pageNum == -2) {
+                Button dotsButton = new Button("...");
+                dotsButton.addClickListener(e -> {
+                    currentPage = Math.min(totalPages - 1, currentPage + 3);
+                    refreshGrid();
+                });
+                pageNumberLayout.add(dotsButton);
+            } else {
+                Button pageButton = new Button(String.valueOf(pageNum + 1));
+                pageButton.addClickListener(e -> {
+                    if (pageNum != currentPage) {
+                        currentPage = pageNum;
+                        refreshGrid();
+                    }
+                });
+
+                // تعطيل زر الصفحة الحالية وتمييزها بصريًا
+                if (pageNum == currentPage) {
+                    pageButton.setEnabled(false);
+                    pageButton.addClassName("selected");
+                }
+
+                pageNumberLayout.add(pageButton);
+            }
+        }
+    }
+
     public void setPersonelEditor(PersonelEditor personelEditor) {
         this.personelEditor = personelEditor;
     }
 
-    /**
-     * Personel düzenleyici bileşenini almak için kullanılan metod.
-     * 
-     * @return Personel düzenleyici bileşeni.
-     */
     public PersonelEditor getPersonelEditor() {
         return personelEditor;
     }
 
-    /**
-     * Personel için düzenleme ve silme butonlarını içeren bir yatay düzen
-     * oluşturur.
-     * 
-     * @param person Düzenleme ve silme işlemi yapılacak personel.
-     * @return Düzenleme ve silme butonlarını içeren bir yatay düzen.
-     */
+    private void setupConfirmationDialog() {
+        confirmDialog.add(new Text("Bu kişiyi silmek istediğinizden emin misiniz?"));
+
+        Button confirmButton = new Button("Evet", event -> {
+            if (personToDelete != null) {
+                ((PersonelDataProvider) dataProvider).delete(personToDelete.getId());
+                refreshGrid();
+                Notification.show("Öğe başarıyla silindi!", 3000, Notification.Position.TOP_END)
+                        .addThemeVariants(NotificationVariant.LUMO_WARNING);
+            }
+            confirmDialog.close();
+        });
+
+        Button cancelButton = new Button("İptal", event -> confirmDialog.close());
+        confirmDialog.add(new HorizontalLayout(confirmButton, cancelButton));
+    }
+
     private HorizontalLayout createActionsLayout(Person person) {
         Button editButton = new Button(VaadinIcon.EDIT.create());
         Button deleteButton = new Button(VaadinIcon.TRASH.create(), e -> {
-            personService.delete(person.getId());
-            refreshGrid();
+            personToDelete = person;
+            confirmDialog.open();
         });
         deleteButton.getStyle().set("color", "red");
 
@@ -178,38 +251,6 @@ public class PersonelGrid extends Div {
         return new HorizontalLayout(editButton, deleteButton);
     }
 
-    public void filterByName(String name) {
-        List<Person> filteredList = personService.searchByName(name);
-        grid.setItems(filteredList);
-    }
-
-    /**
-     * Grid'i yeniler, tüm verileri tekrar yükler.
-     */
-    public void refreshGrid() {
-        Pageable pageable = PageRequest.of(currentPage, pageSize);
-        Page<Person> personPage = personService.list(pageable);
-        grid.setItems(personPage.getContent());
-        previousButton.setEnabled(currentPage > 0);
-        nextButton.setEnabled(personPage.hasNext());
-        updatePageNumberLayout(personPage.getTotalPages());
-    }
-
-    private void updatePageNumberLayout(int totalPages) {
-        pageNumberLayout.removeAll();
-        for (int i = 0; i < totalPages; i++) {
-            final int pageIndex = i; // تعريف متغير نهائي محلي
-            Button pageButton = new Button(String.valueOf(pageIndex + 1));
-            pageButton.addClickListener(e -> {
-                currentPage = pageIndex;
-                refreshGrid();
-            });
-            pageButton.setEnabled(pageIndex != currentPage);
-            pageNumberLayout.add(pageButton);
-        }
-
-    }
-
     public void resetEditButton() {
         if (activeEditButton != null) {
             activeEditButton.setIcon(VaadinIcon.EDIT.create());
@@ -218,9 +259,6 @@ public class PersonelGrid extends Div {
         }
     }
 
-    /**
-     * Düzenleme işlemi için dinleyici arayüzü.
-     */
     public interface EditListener {
         void onEdit();
     }
@@ -229,9 +267,6 @@ public class PersonelGrid extends Div {
         editListeners.add(listener);
     }
 
-    /**
-     * Tüm dinleyicilere düzenleme işleminin başladığını bildirir.
-     */
     private void notifyEditListeners() {
         for (EditListener listener : editListeners) {
             listener.onEdit();

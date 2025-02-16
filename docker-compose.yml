@@ -17,11 +17,11 @@ services:
     build: .
     container_name: vaadin-app
     ports:
-      - "8080:8080"
+      - "8082:8082"
     depends_on:
       - db
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5433/vaadinstart
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5433/test
       SPRING_DATASOURCE_USERNAME: vaadinstart
       SPRING_DATASOURCE_PASSWORD: vaadinstart
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
