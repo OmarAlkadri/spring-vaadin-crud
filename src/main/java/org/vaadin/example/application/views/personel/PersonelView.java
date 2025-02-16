@@ -3,7 +3,6 @@ package org.vaadin.example.application.views.personel;
 import org.vaadin.example.infrastructure.PersonelDataProvider;
 import org.vaadin.lineawesome.LineAwesomeIconUrl;
 
-import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
@@ -18,7 +17,7 @@ import com.vaadin.flow.router.Route;
  * Gelişmiş ve optimize edilmiş PersonelView sınıfı.
  * Bu sınıf, personel yönetim ekranının ana bileşenlerini içerir.
  */
-@CssImport("./themes/my-theme/personel-view.css")
+// @CssImport("./themes/my-theme/personel-view.css")
 @PageTitle("Personel")
 @Route("personel")
 @Menu(order = 1, icon = LineAwesomeIconUrl.USER_FRIENDS_SOLID)

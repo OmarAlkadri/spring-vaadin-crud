@@ -20,12 +20,12 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 
 public class PersonelGrid extends Div {
-
     private Dialog confirmDialog = new Dialog();
     private Person personToDelete;
     private final DataProvider<Person, Void> dataProvider;
@@ -39,6 +39,7 @@ public class PersonelGrid extends Div {
     private final Button previousButton;
     private final Button nextButton;
     private final ComboBox<Integer> pageSizeSelector;
+    private final TextField totalItemsField;
 
     private HorizontalLayout pageNumberLayout;
 
@@ -70,7 +71,11 @@ public class PersonelGrid extends Div {
             refreshGrid();
         });
 
-        HorizontalLayout leftLayout = new HorizontalLayout(pageSizeSelector);
+        totalItemsField = new TextField("Total Items");
+        totalItemsField.setReadOnly(true);
+        totalItemsField.setWidth("100px");
+
+        HorizontalLayout leftLayout = new HorizontalLayout(pageSizeSelector, totalItemsField);
         leftLayout.setWidthFull();
         leftLayout.setJustifyContentMode(JustifyContentMode.START);
 
@@ -127,6 +132,10 @@ public class PersonelGrid extends Div {
             grid.setItems(items);
             previousButton.setEnabled(currentPage > 0);
             nextButton.setEnabled(personelDataProvider.hasNext());
+
+            int totalItems = personelDataProvider.getTotalItemCount();
+            totalItemsField.setValue(String.valueOf(totalItems));
+
             updatePageNumberLayout(personelDataProvider.getTotalPages(pageSize));
         }
     }

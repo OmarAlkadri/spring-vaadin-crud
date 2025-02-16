@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -23,10 +24,10 @@ import com.github.javafaker.Faker;
  * işlemlerini gerçekleştirir.
  */
 @Service
+@Primary
 @Profile("dummy") // Bu service yalnızca "dummy" profile aktif olduğunda çalışır.
-@ConditionalOnProperty(name = "db.enabled", havingValue = "true", matchIfMissing = true) // Eğer "db.enabled" true ise
-                                                                                         // veya tanımlanmamışsa bu
-                                                                                         // service etkin olur.
+@ConditionalOnProperty(name = "db.enabled", havingValue = "false", matchIfMissing = true)
+// Eğer "db.enabled" true ise veya tanımlanmamışsa bu service etkin olur.
 public class PersonServiceDummy implements IPersonService {
 
     private final List<Person> dummyData;

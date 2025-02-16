@@ -18,9 +18,8 @@ import org.vaadin.example.services.IPersonService;
  */
 @Service
 @Profile("sql") // Bu service yalnızca "sql" profile aktif olduğunda çalışır.
-@ConditionalOnProperty(name = "db.enabled", havingValue = "false", matchIfMissing = true) // Eğer "db.enabled" false ise
-                                                                                          // veya tanımlanmamışsa bu
-                                                                                          // service etkin olur.
+@ConditionalOnProperty(name = "db.enabled", havingValue = "true", matchIfMissing = true)
+// Eğer "db.enabled" false ise veya tanımlanmamışsa bu service etkin olur.
 public class PersonServiceSQL implements IPersonService {
 
     private final PersonRepository repository;
