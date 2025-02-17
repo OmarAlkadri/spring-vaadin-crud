@@ -3,8 +3,11 @@ package org.vaadin.example.application.views.personel;
 import org.vaadin.example.infrastructure.PersonelDataProvider;
 import org.vaadin.lineawesome.LineAwesomeIconUrl;
 
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -45,8 +48,21 @@ public class PersonelView extends SplitLayout {
         this.personelSearch = new PersonelSearch(personelGrid);
 
         HorizontalLayout toolbar = createToolbar();
+        Button refreshButton = createRefreshButton();
 
-        configureLayout(toolbar);
+        configureLayout(toolbar, refreshButton);
+    }
+
+    private Button createRefreshButton() {
+        Button refreshButton = new Button("Yenile", event -> {
+            personelDataProvider.addNewMockPerson();
+            personelGrid.refreshGrid();
+        });
+
+        refreshButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        refreshButton.setWidthFull();
+        refreshButton.setMaxWidth("150px");
+        return refreshButton;
     }
 
     /**
@@ -66,9 +82,20 @@ public class PersonelView extends SplitLayout {
      * 
      * @param toolbar Arama ve ekleme butonlarını içeren araç çubuğu.
      */
-    private void configureLayout(HorizontalLayout toolbar) {
+    private void configureLayout(HorizontalLayout toolbar, Button refreshButton) {
         setSizeFull();
-        addToPrimary(new VerticalLayout(toolbar, personelGrid));
+
+        HorizontalLayout refreshButtonWrapper = new HorizontalLayout(refreshButton);
+        refreshButtonWrapper.setWidthFull();
+        refreshButtonWrapper.setJustifyContentMode(JustifyContentMode.END);
+
+        VerticalLayout layout = new VerticalLayout(toolbar, personelGrid, refreshButtonWrapper);
+        layout.setSizeFull();
+        layout.setSpacing(true);
+        layout.setAlignItems(Alignment.STRETCH);
+        layout.setFlexGrow(1, personelGrid);
+
+        addToPrimary(layout);
         personelEditor.setVisible(false);
         addToSecondary(personelEditor);
         setSplitterPosition(70);

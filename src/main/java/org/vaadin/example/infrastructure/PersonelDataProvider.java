@@ -1,5 +1,6 @@
 package org.vaadin.example.infrastructure;
 
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -13,6 +14,9 @@ import org.springframework.web.client.RestTemplate;
 import org.vaadin.example.domain.dto.PageResponse;
 import org.vaadin.example.domain.model.Person;
 
+import com.github.javafaker.Faker;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.data.provider.AbstractBackEndDataProvider;
 import com.vaadin.flow.data.provider.Query;
 
@@ -135,6 +139,18 @@ public class PersonelDataProvider extends AbstractBackEndDataProvider<Person, Vo
      */
     public void delete(Long personId) {
         restTemplate.delete(baseUrl + "/" + personId);
+        refreshAll();
+    }
+
+    public void addNewMockPerson() {
+        Person entity = new Person();
+        Faker faker = new Faker();
+        entity.setFirstName(faker.name().firstName());
+        entity.setLastName(faker.name().lastName());
+        entity.setNationalNumber(faker.number().digits(10));
+        save(entity);
+        Notification.show("Yeni çalışan başarıyla kaydedildi!", 3000, Notification.Position.TOP_END)
+                .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
         refreshAll();
     }
 }

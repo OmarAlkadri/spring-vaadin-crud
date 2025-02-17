@@ -54,7 +54,7 @@ public class PersonelGrid extends Div {
         grid.addColumn(Person::getLastName).setHeader("Last Name").setAutoWidth(true);
         grid.addColumn(Person::getNationalNumber).setHeader("National Number").setAutoWidth(true);
         grid.addColumn(new ComponentRenderer<>(this::createActionsLayout)).setHeader("func").setAutoWidth(true);
-        grid.setMaxHeight("325px");
+        grid.setMaxHeight("322px");
 
         setHeight(null);
         setWidthFull();

@@ -101,14 +101,20 @@ VS Code içinde **launch.json** dosyanızı aşağıdaki gibi yapılandırarak p
       "name": "Run Application with DB enabled",
       "request": "launch",
       "mainClass": "org.vaadin.example.Application",
-      "args": "--db.enabled=true"
+      "env": {
+        "DB_ENABLED": "true",
+        "SPRING_PROFILES_ACTIVE": "sql"
+      }
     },
     {
       "type": "java",
       "name": "Run Application with DB disabled",
       "request": "launch",
       "mainClass": "org.vaadin.example.Application",
-      "args": "--db.enabled=false"
+      "env": {
+        "DB_ENABLED": "false",
+        "SPRING_PROFILES_ACTIVE": "dummy"
+      }
     }
   ]
 }
