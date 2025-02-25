@@ -63,18 +63,17 @@ Bu proje, **Monad Yazılım** firmasının teknik değerlendirmesi kapsamında g
 
 ## Projeyi Çalıştırma
 ### Maven ile Çalıştırma
-PostgreSQL veritabanını etkin veya devre dışı bırakmak için aşağıdaki komutları kullanabilirsiniz:
+Aşağıdaki komutları kullanarak PostgreSQL veritabanını etkinleştirebilir veya devre dışı bırakabilirsiniz:
 ```sh
-mvn spring-boot:run -Ddb.enabled=true   # PostgreSQL etkin
-mvn spring-boot:run -Ddb.enabled=false  # Sahte veri kaynağı kullanımı
-mvn spring-boot:run -Ddb.e   # Alternatif komut
-mvn spring-boot:run -Ddb.enabled=falsenabled=true   # Alternatif komut
-mvn spring-boot:run -Ddb.enabled=falsenabled=false  # Alternatif komut
+mvn spring-boot:run -Dspring-boot.run.arguments="--spring.profiles.active=dummy" -Ddb.enabled=false  # Sahte veri kaynağı kullanımı
+mvn spring-boot:run -Dspring-boot.run.arguments="--spring.profiles.active=sql" -Ddb.enabled=true    # PostgreSQL etkin
 ```
-PostgreSQL veritabanını etkin veya devre dışı bırakmak için aşağıdaki komutları kullanabilirsiniz:
+
+### Docker Compose ile Çalıştırma
+Eğer PostgreSQL veritabanını **Docker Compose** ile çalıştırmak istiyorsanız, aşağıdaki komutları kullanabilirsiniz:
 ```sh
-mvn spring-boot:run -Ddb.enabled=true   # PostgreSQL etkin
-mvn spring-boot:run -Ddb.enabled=false  # Sahte veri kaynağı kullanımı
+DB_ENABLED=true SPRING_PROFILE=sql docker-compose up --build   # PostgreSQL etkin
+DB_ENABLED=false SPRING_PROFILE=dummy docker-compose up --build # Sahte veri kaynağı kullanımı
 ```
 
 ### VS Code Debugger Kullanımı
@@ -121,7 +120,7 @@ VS Code içinde **launch.json** dosyanızı aşağıdaki gibi yapılandırarak p
 ```
 
 ### PostgreSQL Kullanımı
-PostgreSQL veritabanını **Docker** ile çalıştırmak yerine aşağıdaki komutları kullanarak manuel olarak başlatabilirsiniz:
+PostgreSQL veritabanını **Docker** ile çalıştırmak için aşağıdaki komutları kullanabilirsiniz:
 ```sh
 # PostgreSQL konteynerini başlatma
 docker run --name postgres-db -e POSTGRES_USER=vaadinstart -e POSTGRES_PASSWORD=vaadinstart -e POSTGRES_DB=test -p 5433:5432 -d postgres:13

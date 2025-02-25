@@ -144,26 +144,21 @@ public class PersonelGrid extends Div {
         pageNumberLayout.removeAll();
         List<Integer> pages = new ArrayList<>();
 
-        // إضافة الصفحة الأولى دائمًا
         if (totalPages > 0)
             pages.add(0);
 
-        // إضافة "..." قبل الصفحات الوسطية إذا كانت هناك فجوة
         if (currentPage > 2) {
-            pages.add(-1); // "..." للذهاب للخلف
+            pages.add(-1);
         }
 
-        // إضافة الصفحات القريبة من الصفحة الحالية
         for (int i = Math.max(1, currentPage - 1); i <= Math.min(totalPages - 2, currentPage + 1); i++) {
             pages.add(i);
         }
 
-        // إضافة "..." بعد الصفحات الوسطية إذا كانت هناك فجوة
         if (currentPage < totalPages - 3) {
-            pages.add(-2); // "..." للذهاب للأمام
+            pages.add(-2);
         }
 
-        // إضافة الصفحة الأخيرة دائمًا (إذا لم تكن موجودة بالفعل)
         if (totalPages > 1 && !pages.contains(totalPages - 1)) {
             pages.add(totalPages - 1);
         }
@@ -192,7 +187,6 @@ public class PersonelGrid extends Div {
                     }
                 });
 
-                // تعطيل زر الصفحة الحالية وتمييزها بصريًا
                 if (pageNum == currentPage) {
                     pageButton.setEnabled(false);
                     pageButton.addClassName("selected");
